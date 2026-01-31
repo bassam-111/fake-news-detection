@@ -16,16 +16,13 @@ cd fake-news-detection
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Download dataset (see dataset/README.md)
-# Place Fake.csv and True.csv in dataset/ folder
+# 3. Download dataset (see dataset/README.md for instructions)
+# Place Fake.csv and True.csv in dataset/ folder, then merge them into news.csv
 
-# 4. Merge datasets
-python merge_dataset.py
-
-# 5. Train model (~20 minutes)
+# 4. Train model (~20 minutes)
 python model/train_model.py
 
-# 6. Run web app
+# 5. Run web app
 python app.py
 # Visit: http://localhost:5000
 ```
@@ -67,8 +64,6 @@ fake-news-detection/
 │   └── index.html               # Web UI
 ├── app.py                       # Flask application
 ├── predict.py                   # Standalone prediction script
-├── merge_dataset.py             # Dataset merger
-├── download_dataset.py          # Kaggle downloader
 ├── requirements.txt             # Python dependencies
 └── README.md                    # This file
 ```
