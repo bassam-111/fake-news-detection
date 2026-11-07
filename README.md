@@ -1,7 +1,6 @@
 # Fake News Detection System
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![Accuracy](https://img.shields.io/badge/Accuracy-99.32%25-success)](https://github.com/bassam-111/fake-news-detection)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 An NLP-based machine learning system to automatically detect fake news articles using TF-IDF feature extraction and multiple classification algorithms.
@@ -70,6 +69,8 @@ fake-news-detection/
 
 ## 📊 Dataset & Results
 
+> **Note:** The dataset files and trained model artifacts are not committed in this repository, so the accuracy metrics below are reported from the original training run and are not independently verifiable from this repo alone.
+
 **Source**: [Fake and Real News Dataset](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset) (Kaggle)
 
 **Dataset Size**: 44,898 articles
@@ -84,7 +85,7 @@ fake-news-detection/
 | Logistic Regression | 98.72% | 99.18% | 98.36% | 98.77% |
 | Naive Bayes | 93.02% | 92.84% | 93.89% | 93.36% |
 
-**Best Model**: PassiveAggressiveClassifier with **99.32% accuracy**
+**Best Model (reported)**: PassiveAggressiveClassifier with **99.32% accuracy** in the original training run.
 
 ## 🔍 Data Preprocessing
 
@@ -146,7 +147,7 @@ python model/train_model.py
 
 ### Results Achieved
 
-The models were trained on 44,898 real articles from Kaggle:
+The models were reportedly trained on 44,898 articles from Kaggle during the original run:
 - **Training set**: 35,918 articles (80%)
 - **Testing set**: 8,980 articles (20%)
 - **Training time**: ~20 minutes on Core i7 8th gen, 16GB RAM
@@ -386,7 +387,3 @@ Created for NLP + ML learning and portfolio building.
 **Happy Learning! 🚀**
 
 For questions or improvements, feel free to create an issue or pull request.
-=======
-# fake-news-detection
-NLP-based fake news detection system using TF-IDF and machine learning classifiers. Achieves 99.32% accuracy on 44,898 articles. Features a Flask web interface for real-time predictions.
->>>>>>> 6c3a8372668d2462a1ca5ca2fc2c647c7560c3b7

@@ -16,6 +16,7 @@ os.makedirs(TEMPLATES_DIR, exist_ok=True)
 # Load model
 MODEL_PATH = os.path.join(MODEL_DIR, 'passive_aggressive_model.pkl')
 model = None
+DEBUG = os.getenv('FLASK_DEBUG', 'false').lower() in {'1', 'true', 'yes', 'on'}
 
 def load_model():
     """Load the trained model."""
@@ -95,4 +96,4 @@ def health():
 
 if __name__ == '__main__':
     load_model()
-    app.run(debug=True, port=5000)
+    app.run(debug=DEBUG, port=5000)
