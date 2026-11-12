@@ -2,47 +2,53 @@
 
 This folder contains the news dataset files for training the fake news detection model.
 
-## Required Files
+## Quick test: bundled sample dataset
 
-To train the model, you need:
-- `news.csv` - Combined dataset (fake + real news)
-
-OR
-
-- `Fake.csv` - Fake news articles
-- `True.csv` - Real news articles
-
-## How to Get the Dataset
-
-### Option 1: Download from Kaggle (Recommended)
-
-1. Visit: https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset
-2. Download the dataset
-3. Extract and place `Fake.csv` and `True.csv` in this folder
-4. Run: `python merge_dataset.py` to create `news.csv`
-
-### Option 2: Use Kaggle API
+`sample_news.csv` is a small dataset of 40 original, hand-written examples
+(20 FAKE, 20 REAL) included in the repo so the full pipeline can be tried
+without downloading anything:
 
 ```bash
-# Setup Kaggle credentials first (see DOWNLOAD_DATASET.md)
-python download_dataset.py
+python model/train_model.py --sample
+python app.py
 ```
 
-### Option 3: Use Sample Data (Testing Only)
+Sample metrics are **not** representative of real performance — the sample
+only exists to prove the pipeline runs end to end.
 
+## Full dataset (for real training)
+
+To train the model properly, you need the Kaggle Fake and Real News
+Dataset (44,898 articles):
+
+1. Download it from https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset
+2. Extract `Fake.csv` and `True.csv` into this folder
+3. Merge them into `news.csv` with:
+
+```python
+import pandas as pd
+
+fake = pd.read_csv('dataset/Fake.csv')
+real = pd.read_csv('dataset/True.csv')
+fake['label'] = 'FAKE'
+real['label'] = 'REAL'
+news = pd.concat([fake, real], ignore_index=True)[['title', 'text', 'label']]
+news.to_csv('dataset/news.csv', index=False)
+```
+
+4. Train:
 ```bash
-# Creates a small sample dataset for testing
-python create_sample_dataset.py
+python model/train_model.py
 ```
 
-## Dataset Structure
+## Dataset structure
 
 The `news.csv` file should have these columns:
 - `title` - Article headline
 - `text` - Article content
 - `label` - FAKE or REAL
 
-## File Sizes
+## File sizes
 
 - `Fake.csv`: ~63 MB
 - `True.csv`: ~54 MB
@@ -50,8 +56,6 @@ The `news.csv` file should have these columns:
 
 ## Notes
 
-⚠️ **Important**: Large dataset files (>100MB) are excluded from Git via `.gitignore`
-
-✅ Each user must download the dataset separately to train the model
-
-✅ Trained model files (.pkl) are also excluded from Git
+⚠️ **Important**: Large dataset files (`news.csv`, `Fake.csv`, `True.csv`)
+and trained model files (`.pkl`) are excluded from Git via `.gitignore`
+— each user downloads the dataset and trains locally.

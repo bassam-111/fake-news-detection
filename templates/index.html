@@ -305,7 +305,7 @@
             `;
 
             if (data.confidence !== null) {
-                html += `<div class="confidence"><strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%</div>`;
+                html += `<div class="confidence"><strong>Decision score:</strong> ${data.confidence.toFixed(2)} (raw model margin, not a probability)</div>`;
             }
 
             html += '</div>';

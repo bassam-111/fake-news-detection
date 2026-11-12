@@ -4,7 +4,7 @@ This guide will help you set up and use the fake news detection system.
 
 ## 📋 Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - 16GB RAM recommended (8GB minimum)
 - 5GB free disk space
 - Internet connection (for dataset download)
@@ -44,15 +44,24 @@ pip install -r requirements.txt
 2. Download the dataset ZIP file
 3. Extract `Fake.csv` and `True.csv`
 4. Place them in the `dataset/` folder
-5. Run: `python merge_dataset.py`
+5. Merge them into `news.csv` — the exact snippet is in `dataset/README.md`
 
-### Method 2: Kaggle API (Automated)
+### Method 2: Kaggle CLI
 
 ```bash
-# 1. Get Kaggle API token from https://www.kaggle.com/settings/account
-# 2. Place kaggle.json in ~/.kaggle/ (Linux/Mac) or C:\Users\<username>\.kaggle\ (Windows)
-# 3. Run downloader
-python download_dataset.py
+# 1. Install the Kaggle CLI and put your API token in ~/.kaggle/kaggle.json
+pip install kaggle
+# 2. Download and unzip
+kaggle competitions download -c fake-and-real-news-dataset
+unzip fake-and-real-news-dataset.zip -d dataset/
+# 3. Merge Fake.csv + True.csv into news.csv (snippet in dataset/README.md)
+```
+
+### Method 3: Bundled sample (no download)
+
+```bash
+# Trains on the 40-row sample in dataset/sample_news.csv — smoke test only
+python model/train_model.py --sample
 ```
 
 See `dataset/README.md` for detailed instructions.
@@ -65,11 +74,11 @@ Once you have the dataset (`news.csv` in `dataset/` folder):
 python model/train_model.py
 ```
 
-**Training time**: 15-25 minutes on Core i7 8th gen with 16GB RAM
+**Training time**: 15-25 minutes on Core i7 8th gen with 16GB RAM (seconds on the bundled sample with `--sample`)
 
 **Expected output**:
 - 3 trained models saved in `model/` folder
-- Accuracy: ~99%
+- Accuracy: 99.32% reported from the original training run (not independently verifiable from this repo alone — dataset and model files are not committed)
 - Models: `passive_aggressive_model.pkl`, `logistic_regression_model.pkl`, `naive_bayes_model.pkl`
 
 ## 🌐 Running the Web Application
@@ -88,7 +97,7 @@ python app.py
 2. Paste or type news article text
 3. Click "Analyze News"
 4. See prediction: FAKE or REAL
-5. View confidence score
+5. View the decision score (raw model margin, not a probability)
 
 ## 💻 Using the Standalone Predictor
 
@@ -126,14 +135,17 @@ print(f"Prediction: {result}")
 
 ## 📈 Model Performance
 
-Best Model: **PassiveAggressiveClassifier**
+Best Model: **PassiveAggressiveClassifier** (reported from the original training run)
 
 - **Accuracy**: 99.32%
 - **Precision**: 99.36%
 - **Recall**: 99.34%
 - **F1-Score**: 99.35%
 
-Tested on 8,980 articles (20% test split from 44,898 total articles)
+Tested on 8,980 articles (20% test split from 44,898 total articles).
+These numbers are reported, not independently verifiable from this repo
+alone — the dataset and trained models are not committed here. To verify
+them, download the dataset and re-run `python model/train_model.py`.
 
 ## 🔧 Troubleshooting
 
@@ -147,7 +159,9 @@ Tested on 8,980 articles (20% test split from 44,898 total articles)
 
 **Problem**: `Dataset not found at dataset/news.csv`
 
-**Solution**: Download dataset and run `python merge_dataset.py`
+**Solution**: Download the dataset and merge `Fake.csv` + `True.csv` into
+`news.csv` (snippet in `dataset/README.md`) — or run
+`python model/train_model.py --sample` for a quick test without the dataset
 
 ### Memory error during training
 
@@ -173,7 +187,8 @@ flask run --port 8080
 
 ### POST /predict
 
-Predict if news text is fake or real.
+Predict if news text is fake or real. `score` and `confidence` are the
+raw decision-function margin (and its absolute value) — not probabilities.
 
 **Request**:
 ```json

@@ -1,35 +1,44 @@
 # Fake News Detection System
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 An NLP-based machine learning system to automatically detect fake news articles using TF-IDF feature extraction and multiple classification algorithms.
 
 ## 🚀 Quick Start
 
+**Try it in under a minute, no download needed** — the repo includes a
+40-row sample dataset to prove the pipeline runs end to end:
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/bassam-111/fake-news-detection.git
 cd fake-news-detection
 
-# 2. Install dependencies
+# 2. Install dependencies (Python 3.10+)
 pip install -r requirements.txt
 
-# 3. Download dataset (see dataset/README.md for instructions)
-# Place Fake.csv and True.csv in dataset/ folder, then merge them into news.csv
+# 3. Train on the bundled sample dataset (seconds)
+python model/train_model.py --sample
 
-# 4. Train model (~20 minutes)
-python model/train_model.py
+# 4. Run the tests
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
 
 # 5. Run web app
 python app.py
 # Visit: http://localhost:5000
 ```
 
+Sample metrics are **not** representative of real performance — the sample
+only exists to verify the pipeline. For real training, download the Kaggle
+dataset (see [Dataset & Results](#-dataset--results)) and run
+`python model/train_model.py` (full training takes ~15–25 minutes).
+
 ## 📋 Overview
 
 This project implements a complete pipeline for fake news detection:
-- **Text Preprocessing**: Lowercasing, punctuation removal, stopword removal, tokenization
+- **Text Preprocessing**: Lowercasing and English stopword removal (built into the TF-IDF vectorizer), title + text combined into one field
 - **Feature Extraction**: TF-IDF (Term Frequency-Inverse Document Frequency)
 - **Machine Learning Models**: PassiveAggressiveClassifier, LogisticRegression, Naive Bayes
 - **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
@@ -41,12 +50,11 @@ Fake news spreads rapidly on social media and misleads the public. This system a
 
 ## 🧰 Tech Stack
 
-- **Python 3.8+**
+- **Python 3.10+**
 - **Pandas** - Data manipulation
 - **NumPy** - Numerical computations
 - **Scikit-learn** - ML algorithms and utilities
-- **NLTK** - Natural language processing
-- **Flask** - Web framework (optional)
+- **Flask** - Web framework
 - **Joblib** - Model serialization
 
 ## 📂 Folder Structure
@@ -55,15 +63,20 @@ Fake news spreads rapidly on social media and misleads the public. This system a
 fake-news-detection/
 ├── dataset/
 │   ├── README.md                # Dataset instructions
-│   └── news.csv                 # Dataset file (download required)
+│   ├── sample_news.csv          # 40-row sample dataset (bundled)
+│   └── news.csv                 # Full dataset file (download required)
 ├── model/
 │   ├── train_model.py           # Training script
 │   └── *.pkl                    # Trained models (after training)
 ├── templates/
 │   └── index.html               # Web UI
+├── tests/
+│   ├── test_app.py              # Flask API tests
+│   └── test_train.py            # Pipeline, sample data and predictor tests
 ├── app.py                       # Flask application
 ├── predict.py                   # Standalone prediction script
-├── requirements.txt             # Python dependencies
+├── requirements.txt             # Python dependencies (pinned)
+├── requirements-dev.txt         # Test dependencies
 └── README.md                    # This file
 ```
 
@@ -92,12 +105,9 @@ fake-news-detection/
 1. **Remove Missing Values**: Eliminate rows with null titles, text, or labels
 2. **Combine Features**: Merge title and text for better context
 3. **Label Encoding**: FAKE → 1, REAL → 0
-4. **Text Cleaning**: 
+4. **Text Cleaning** (inside the TF-IDF vectorizer):
    - Lowercase conversion
-   - Punctuation removal
-   - Stopword removal (English)
-   - Tokenization
-   - Lemmatization (optional)
+   - English stopword removal
 
 ## 🤖 Model Architecture
 
@@ -120,16 +130,13 @@ Pipeline([
 1. **PassiveAggressiveClassifier** ⭐ (Recommended)
    - Best for online learning
    - Fast and efficient
-   - Expected Accuracy: ~92-94%
 
 2. **Logistic Regression**
    - Probabilistic classifier
    - Good interpretability
-   - Expected Accuracy: ~90-92%
 
 3. **Naive Bayes**
    - Fast and lightweight
-   - Expected Accuracy: ~88-90%
 
 ## 🧪 Training & Evaluation
 
@@ -139,9 +146,8 @@ Pipeline([
 # Install dependencies
 pip install -r requirements.txt
 
-# Download dataset from Kaggle and place in dataset/news.csv
-
-# Train all models
+# Download dataset from Kaggle, merge Fake.csv + True.csv into
+# dataset/news.csv (see dataset/README.md), then train all models
 python model/train_model.py
 ```
 
@@ -160,10 +166,9 @@ Actual REAL    4254      30
        FAKE      31    4665
 ```
 
-**Key Metrics**:
+**Key Metrics** (reported from the original run, see the note above):
 - ✅ Only 30 false positives (real news flagged as fake)
 - ✅ Only 31 false negatives (fake news passed as real)
-- ✅ Highly reliable for production use
 
 ## 🌐 Web Interface (Optional)
 
@@ -180,11 +185,15 @@ Then navigate to `http://localhost:5000` in your browser.
 
 - ✅ Paste or type news content
 - ✅ Real-time prediction
-- ✅ Confidence scores
+- ✅ Decision score for each prediction (raw model margin, not a probability)
 - ✅ Responsive design
 - ✅ Mobile-friendly UI
 
 ### API Endpoints
+
+`score` and `confidence` are the raw decision-function margin (and its
+absolute value). They are **not** probabilities: the sign points at the
+predicted class and a larger absolute value means a more confident margin.
 
 **POST `/predict`**
 ```json
@@ -211,9 +220,46 @@ Response:
 }
 ```
 
+## 🧪 Demo (verified run)
+
+Trained on the bundled 40-row sample and queried live — sample numbers
+only, not real performance:
+
+```bash
+$ python model/train_model.py --sample
+Sample mode: training on the 40-row bundled sample dataset.
+Training set size: 32
+Testing set size: 8
+passive_aggressive        | Accuracy: 0.8750 | F1: 0.8889
+logistic_regression       | Accuracy: 0.8750 | F1: 0.8889
+naive_bayes               | Accuracy: 1.0000 | F1: 1.0000
+
+$ curl -s http://localhost:5000/health
+{"model_loaded":true,"status":"ready"}
+
+$ curl -s -X POST http://localhost:5000/predict \
+    -H 'Content-Type: application/json' \
+    -d '{"text": "Scientists confirm drinking cola cures cancer in 48 hours"}'
+{"confidence":0.47321269849638203,"prediction":"FAKE","score":0.47321269849638203,"text":"Scientists confirm drinking cola cures cancer in 48 hours"}
+
+$ curl -s -X POST http://localhost:5000/predict \
+    -H 'Content-Type: application/json' \
+    -d '{"text": "City council approves budget for road repairs"}'
+{"confidence":0.7482182318521048,"prediction":"REAL","score":-0.7482182318521048,"text":"City council approves budget for road repairs"}
+
+$ python predict.py "Secret government conspiracy revealed by leaked documents"
+✓ Prediction: FAKE
+  Decision score: 0.63 (raw model margin, not a probability)
+```
+
+No UI screenshot is included: this environment has no usable headless
+browser (the Playwright Chromium download failed and the system Chrome
+is blocked by a domain policy), so the demo above is a real terminal
+transcript instead.
+
 ## 📝 Key Features
 
-✔ **Production-Ready Code**
+✔ **Structured Code**
 - Modular structure
 - Error handling
 - Logging capability
@@ -255,7 +301,11 @@ pip install -r requirements.txt
 
 1. Go to [Kaggle Fake and Real News Dataset](https://www.kaggle.com/clmentbisaillon/fake-and-real-news-dataset)
 2. Download the dataset
-3. Place `news.csv` in the `dataset/` folder
+3. Extract `Fake.csv` and `True.csv` into the `dataset/` folder
+4. Merge them into `dataset/news.csv` (snippet in `dataset/README.md`)
+
+Or skip the download and try the bundled sample first:
+`python model/train_model.py --sample`
 
 ### 3. Train Model
 
@@ -323,9 +373,9 @@ python app.py
 
 ## 📊 Project Metrics
 
-- **Lines of Code**: ~500 (core model)
-- **Training Time**: ~2-5 minutes (varies by hardware)
-- **Model Size**: ~50-100 MB
+- **Lines of Code**: ~500 (app + training + predictor), ~700 including tests
+- **Training Time**: ~15–25 minutes on the full 44,898-article dataset; seconds on the bundled sample
+- **Model Size**: ~50–100 MB (full dataset); sample models ~20 KB
 - **Prediction Time**: <100ms per article
 
 ## 🎓 Why This Project is Strong
@@ -339,8 +389,8 @@ python app.py
 
 ✅ **Real-World Application**
 - Addresses actual problem (misinformation)
-- Scalable architecture
-- Production-ready code
+- Clean, structured code
+- End-to-end pipeline: data → training → API → UI
 
 ✅ **Portfolio Value**
 - Impressive for internship applications

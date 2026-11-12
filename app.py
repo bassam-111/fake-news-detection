@@ -35,6 +35,30 @@ def load_model():
         return False
 
 
+def _decision_score(text):
+    """Raw decision-function margin for one text, or None.
+
+    The value is a raw model margin, NOT a probability: its sign points at
+    the predicted class and a larger absolute value means a more confident
+    margin. Returns None when the loaded model has no decision function
+    (for example, a plain classifier instead of a pipeline).
+    """
+    try:
+        steps = getattr(model, 'named_steps', None)
+        clf = steps.get('clf') if isinstance(steps, dict) else None
+        if clf is not None and hasattr(clf, 'decision_function'):
+            return float(model.decision_function([text])[0])
+    except Exception:
+        return None
+    return None
+
+
+# Load at import time too, so the app also works under `flask run` and
+# WSGI servers (not only `python app.py`). Missing model is not fatal:
+# /health reports not_ready and /predict explains how to train.
+load_model()
+
+
 @app.route('/')
 def home():
     """Render the home page."""
@@ -67,12 +91,11 @@ def predict():
         
         # Make prediction
         prediction = model.predict([text])[0]
-        
-        # Get decision function score if available
-        score = None
-        if hasattr(model.named_steps['clf'], 'decision_function'):
-            score = float(model.decision_function([text])[0])
-        
+
+        # Raw decision-function margin (not a probability). See
+        # _decision_score: sign points at the class, |score| is the margin.
+        score = _decision_score(text)
+
         label = "FAKE" if prediction == 1 else "REAL"
         confidence = abs(score) if score is not None else None
         
